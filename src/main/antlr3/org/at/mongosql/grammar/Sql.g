@@ -69,7 +69,7 @@ expr returns [Object value] // access as $expr.value in other rules
     ;
 // END: expr
 
-OPERATOR : '='|'!='|'>'|'<';	
+OPERATOR : '='|'<>'|'>'|'<'|'>='|'<=';
 
 ID  :   ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 

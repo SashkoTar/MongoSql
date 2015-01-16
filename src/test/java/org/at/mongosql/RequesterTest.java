@@ -5,6 +5,7 @@ import org.at.mongosql.adaptor.DataSourceAdaptor;
 import org.at.mongosql.adaptor.MongoAdaptor;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.UnknownHostException;
@@ -16,7 +17,7 @@ import static junit.framework.Assert.assertEquals;
  * Created by oleksandr.tarasenko on 12/15/2014.
  */
 
-//@Ignore
+@Ignore
 public class RequesterTest {
 
     DB db;

@@ -21,6 +21,11 @@ public class CriteriaBuilder  {
         return this;
     }
 
+    public CriteriaBuilder addCriteria(BasicDBObject criteria) {
+        obj.add(criteria);
+        return this;
+    }
+
     public BasicDBObject build() {
         orCriteria.put("$or", obj);
         return orCriteria;
