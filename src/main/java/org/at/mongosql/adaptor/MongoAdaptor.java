@@ -41,4 +41,10 @@ public class MongoAdaptor implements DataSourceAdaptor {
         BasicDBObject query = new BasicDBObject(conditions);
         return table.find(query);
     }
+
+    @Override
+    public DBCursor find(String collection, BasicDBObject conditions) {
+        DBCollection table = db.getCollection(collection);
+        return table.find(conditions);
+    }
 }

@@ -15,7 +15,7 @@ public class Runner {
         InputStream input = null;
 /*        if ( args.length>0 ) input = new FileInputStream(args[0]);
         else input = System.in;*/
-        input = new FileInputStream("D:\\Projects\\NonJob\\Antlr\\mongo-sql-translator\\input\\sql_input_2.txt");
+        input = new FileInputStream("C:\\Projects\\NonJob\\Grammar\\MongoSql\\input\\sql_input_no_criteria.txt");
         SqlInterpreter interp = new SqlInterpreter();
         interp.interp(input);
     }

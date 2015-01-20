@@ -8,10 +8,14 @@
 ***/
 package org.at.mongosql;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
+import org.at.mongosql.adaptor.DataSourceAdaptor;
+import org.at.mongosql.adaptor.MongoAdaptor;
 import org.at.mongosql.grammar.SqlLexer;
 import org.at.mongosql.grammar.SqlParser;
 import org.at.mongosql.result.ResultSet;
@@ -24,6 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 public class SqlInterpreter {
+
+    SqlConverter converter;
+    DataSourceAdaptor adaptor;
+
     public InterpreterListener listener = // default response to messages
         new InterpreterListener() {
             public void info(String msg) { System.out.println(msg); }
@@ -40,6 +48,8 @@ public class SqlInterpreter {
     public Map<String, Table> tables = new HashMap<String, Table>();
 
     public void interp(InputStream input) throws RecognitionException, IOException {
+        converter = new SqlConverter();
+        adaptor = new MongoAdaptor();
         SqlLexer lex = new SqlLexer(new ANTLRInputStream(input));
         CommonTokenStream tokens = new CommonTokenStream(lex);
         SqlParser parser = new SqlParser(tokens, this);
@@ -47,78 +57,26 @@ public class SqlInterpreter {
         // System.out.println(tables);
     }
 
-    public void createTable(String name,
-                            String primaryKey,
-                            List<Token> columns)
-    {
-        Table table = new Table(name, primaryKey);
-        for (Token t : columns) table.addColumn(t.getText());
-        tables.put(name, table);
-    }
-
-    public void insertInto(String name, Row row) {
-        Table t = tables.get(name);
-        if ( t==null ) { listener.error("No such table "+name); return; }
-        t.add(row);
-    }
 
     public Object select(String name, List<Token> columns) {
-        Table table = tables.get(name);
-        ResultSet rs = new ResultSet();
-        for (Row r : table.rows.values()) rs.add( r.getColumns(columns) );
-        return rs;
-    }
+        DBCursor cursor = adaptor.find("user");
+        printResult(cursor);
 
-    public Object select(String name, List<Token> columns, String key, Object value) {
-        Table table = tables.get(name);
-        ResultSet rs = new ResultSet();
-        if ( key.equals(table.getPrimaryKey()) ) {
-            List<Object> selectedColumnData =
-                table.rows.get(value).getColumns(columns);
-            if ( selectedColumnData.size()==1 ) return selectedColumnData.get(0);
-            rs.add( selectedColumnData );
-            return rs;
-        }
-        // key isn't the primary key; walk linearly to find all rows satisfying
-        for (Row r : table.rows.values()) {
-            if ( r.values.get(key).equals(value) ) {
-                rs.add( r.getColumns(columns) );
-            }
-        }
-        return rs;
-    }
-
-    public Object select(String name, List<Token> columns, Map conditions) {
-        for(Object key : conditions.keySet()) {
-            System.out.println(" Key: " + key + " Value: " + conditions.get(key));
-        }
         return new Object();
     }
 
     public Object select(String name, List<Token> columns, List conditions) {
-        for(Object condition : conditions) {
-            System.out.println(" Size: " + ((List)condition).size());
-        }
+        BasicDBObject dbObject = converter.handle(conditions);
+        DBCursor cursor = adaptor.find("user", dbObject);
+        printResult(cursor);
+
         return new Object();
     }
 
-    public void store(String name, Object o) { globals.put(name, o); }
-
-    public Object load(String name) { return globals.get(name); }
-
-    public void print(Object o) {
-        if ( o instanceof ResultSet ) { // result set?
-            ResultSet rs = (ResultSet)o;
-            for (List<Object> r : rs.results) {
-                for (int i = 0; i<r.size(); i++) {
-                    if ( i>0 ) System.out.print(", ");
-                    System.out.print(r.get(i));
-                }
-                System.out.println();
-            }
-        }
-        else {
-            System.out.println(o.toString());
+    private void printResult(DBCursor cursor) {
+        while(cursor.hasNext()) {
+            System.out.println(cursor.next());
         }
     }
+
 }

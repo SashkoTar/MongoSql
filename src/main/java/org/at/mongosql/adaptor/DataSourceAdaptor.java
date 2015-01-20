@@ -16,4 +16,7 @@ public interface DataSourceAdaptor {
 
     public  DBCursor find(String collection, Map<String, Object> conditions);
 
+    public  DBCursor find(String collection, BasicDBObject conditions);
+
+
 }
