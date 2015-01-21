@@ -40,7 +40,7 @@ scope {
 @init {
 	$select_query::searchConditions = new ArrayList();	
 }
-    :   'select' columns+=ID (',' columns+=ID)* 'from' tbl=ID
+    :   'select' (columns+='*'| (columns+=ID (',' columns+=ID)*)) 'from' tbl=ID
         (   'where' sc=subCondition {$select_query::searchConditions.add($sc.value);} (('or') sc2=subCondition {$select_query::searchConditions.add($sc2.value);})*  {interp.select($tbl.text, $columns, $select_query::searchConditions);}
         |   {interp.select($tbl.text, $columns);}
         )
@@ -60,6 +60,7 @@ scope {
 basicCriteria returns [BasicCriteria value]
 	:	ID OPERATOR expr { $value = new BasicCriteria($ID.text, $OPERATOR.text, $expr.value);} 
 	;
+
 
 // START: expr
 // Match a simple value or do a query

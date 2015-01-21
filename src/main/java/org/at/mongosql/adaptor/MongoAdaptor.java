@@ -30,6 +30,7 @@ public class MongoAdaptor implements DataSourceAdaptor {
         return table.find();
     }
 
+
     public void put(String collection, Map<String, Object> data) {
         DBCollection table = db.getCollection(collection);
         BasicDBObject document = new BasicDBObject(data);
@@ -43,8 +44,8 @@ public class MongoAdaptor implements DataSourceAdaptor {
     }
 
     @Override
-    public DBCursor find(String collection, BasicDBObject conditions) {
+    public DBCursor find(String collection, BasicDBObject conditions, BasicDBObject fields) {
         DBCollection table = db.getCollection(collection);
-        return table.find(conditions);
+        return table.find(conditions, fields);
     }
 }

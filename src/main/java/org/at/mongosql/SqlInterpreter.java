@@ -18,34 +18,16 @@ import org.at.mongosql.adaptor.DataSourceAdaptor;
 import org.at.mongosql.adaptor.MongoAdaptor;
 import org.at.mongosql.grammar.SqlLexer;
 import org.at.mongosql.grammar.SqlParser;
-import org.at.mongosql.result.ResultSet;
-import org.at.mongosql.result.Row;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SqlInterpreter {
 
     SqlConverter converter;
     DataSourceAdaptor adaptor;
 
-    public InterpreterListener listener = // default response to messages
-        new InterpreterListener() {
-            public void info(String msg) { System.out.println(msg); }
-            public void error(String msg) { System.err.println(msg); }
-            public void error(String msg, Exception e) {
-                error(msg); e.printStackTrace(System.err);
-            }
-            public void error(String msg, Token t) {
-                error("line "+t.getLine()+": "+msg);
-            }
-        };
-
-    Map<String, Object> globals = new HashMap<String, Object>();
-    public Map<String, Table> tables = new HashMap<String, Table>();
 
     public void interp(InputStream input) throws RecognitionException, IOException {
         converter = new SqlConverter();
@@ -59,7 +41,7 @@ public class SqlInterpreter {
 
 
     public Object select(String name, List<Token> columns) {
-        DBCursor cursor = adaptor.find("user");
+        DBCursor cursor = adaptor.find(name, new BasicDBObject(), handleColumns(columns));
         printResult(cursor);
 
         return new Object();
@@ -67,7 +49,7 @@ public class SqlInterpreter {
 
     public Object select(String name, List<Token> columns, List conditions) {
         BasicDBObject dbObject = converter.handle(conditions);
-        DBCursor cursor = adaptor.find("user", dbObject);
+        DBCursor cursor = adaptor.find(name, dbObject, handleColumns(columns));
         printResult(cursor);
 
         return new Object();
@@ -77,6 +59,17 @@ public class SqlInterpreter {
         while(cursor.hasNext()) {
             System.out.println(cursor.next());
         }
+    }
+
+    private BasicDBObject handleColumns(List<Token> columns) {
+        BasicDBObject fields = new BasicDBObject();
+        if(columns.size() == 1 && columns.get(0).getText().equals("*")) {
+            return fields;
+        }
+        for(Token field : columns) {
+            fields.append(field.getText(), 1);
+        }
+        return fields;
     }
 
 }

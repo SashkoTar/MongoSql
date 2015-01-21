@@ -88,5 +88,27 @@ public class RequesterTest {
     }
 
 
+    @Test
+    public void shouldReturnFields() throws UnknownHostException {
+        MongoClient mongo = new MongoClient("localhost", 27017);
+        db = mongo.getDB("sqlTest");
+        coll = db.getCollection("user");
+
+        BasicDBObject andQuery = new CriteriaBuilder().
+                addCriteria("name", "kolya").
+                addCriteria("name", "roma").
+                build("$or");
+
+        BasicDBObject andQuery2 = new BasicDBObject();
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("name", 1);
+
+        DBCursor cursor = coll.find(andQuery2, fields);
+        while (cursor.hasNext()) {
+            System.out.println(cursor.next());
+        }
+    }
+
+
 
 }
