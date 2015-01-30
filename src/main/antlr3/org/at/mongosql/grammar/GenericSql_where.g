@@ -1,20 +1,27 @@
 grammar GenericSql_where;
 
+@parser::header {
+   package org.at.mongosql.grammar;
+   import org.at.mongosql.facade.SelectInterpreter;
+}
 
+@lexer::header {
+   package org.at.mongosql.grammar;
+}
 
 program
     :   stat+
     ;
 
-stat:   
-        select_query
+stat
+    :   select_query
     ;
 
 
 
 select_query
-    	:   SELECT columnList 'FROM' tbl=ID
-        (   'WHERE' conditionList  
+    	:   SELECT columnList FROM tbl=ID
+        (   WHERE conditionList  
         |   
         )
     	;
@@ -29,13 +36,13 @@ nestedCondition
 	;
 
 conditionList
-    	: sc=condition  (('OR'|'AND') sc2=condition )*	
+    	: sc=condition  ((OR|AND) sc2=condition )*	
     	;	
 
  
 condition
-	: comparison
-	| nestedCondition
+	: comparison {SelectInterpreter.comparison();}
+	| nestedCondition {SelectInterpreter.nestedCondition();}
 	;	 
     
 comparison 
