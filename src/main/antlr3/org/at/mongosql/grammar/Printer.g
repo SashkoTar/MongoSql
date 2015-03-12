@@ -6,31 +6,20 @@ options {
 }
 @header {
    package org.at.mongosql.grammar;
+      import org.at.mongosql.*;
+      import com.mongodb.BasicDBObject;
 }
-@members { void print(String s) { System.out.print(s); } }
+@members {
+  AstInterpreter interp;
+   void print(String s) { System.out.print(s); }
+}
 // END: header
-
-// START: prog
-//prog:   stat+ ; // match list of statement subtrees
-// match trees like ('=' x 1) and ('print' ('+' 3 4))
-//stat:   ^('=' ID  {print($ID.text+" = ");} expr) {print("\n");}
- //   |   ^('print' {print("print ");}       expr) {print("\n");}
- //   ;
-// END: prog
-
-// START: expr
-//expr:   ^('+' expr {print("+");} expr)
- //   |   ^('*' expr {print("*");} expr)
-  //  |   ^('.' expr {print(".");} expr)
-//    |   ^(VEC {print("[");} expr ({print(", ");} expr)* {print("]");})
- //   |   INT {print($INT.text);}
- //   |   ID  {print($ID.text);}
-  //  ;
-// END: expr
-
 
 
 program
+@init {
+	interp = new AstInterpreter();
+}
     :   stat+
     ;
 
@@ -39,34 +28,46 @@ stat:
     ;
 
 select_query
-    	:    ^(SELECT ^(FROM ID) columnList ^(WHERE conditionList))  {print($ID.text);}
+    	:    ^(SELECT ^(FROM ID) columns=columnList ^(WHERE conditionList))  {interp.select($ID.text, $columns.value);}
     	;
 
-columnList
-	: ^(COLUMNS ID+)
+columnList returns [List value]
+	: ^(COLUMNS (columnNames+=ID)+) {$value = $columnNames;}
 	;
 
-nestedCondition
-	:  conditionList
+nestedCondition returns [BasicDBObject value]
+	:  conditionList {$value = $conditionList.value; }
 	;
 
-conditionList
-    	: ^(OR_COND conjunction+)
+conditionList returns [BasicDBObject value]
+scope {
+	List<BasicDBObject> basicCriteriaList;
+}
+@init {
+	$conditionList::basicCriteriaList =  new ArrayList<BasicDBObject>();
+}
+    	: ^(OR_COND (conjunction {$conditionList::basicCriteriaList.add($conjunction.value);})+) {$value = interp.handleOrCondition($conditionList::basicCriteriaList);}
     	;
 
 
-conjunction
-	: ^(AND_COND condition+)
+conjunction returns [BasicDBObject value]
+scope {
+	List<BasicDBObject> basicCriteriaList;
+}
+@init {
+	$conjunction::basicCriteriaList =  new ArrayList<BasicDBObject>();
+}
+	: ^(AND_COND (condition {$conjunction::basicCriteriaList.add($condition.value);})+) {$value = interp.handleAndCondition($conjunction::basicCriteriaList);}
 	;
 
-condition
-	: comparison
-	| nestedCondition
+condition returns [BasicDBObject value]
+	: comparison {$value = $comparison.value;}
+	| nestedCondition {$value = $nestedCondition.value;}
 	;
 
-comparison
-	: ^(RELOP OPERATOR ID INT)
-	| ^(RELOP OPERATOR ID STRING)
+comparison returns [BasicDBObject value]
+	: ^(RELOP OPERATOR ID INT) { $value = interp.handleBasicCriteria($ID.text, $OPERATOR.text, $INT.int);}
+	| ^(RELOP OPERATOR ID STRING){ $value = interp.handleBasicCriteria($ID.text, $OPERATOR.text, $STRING.text);}
 	;
 
 

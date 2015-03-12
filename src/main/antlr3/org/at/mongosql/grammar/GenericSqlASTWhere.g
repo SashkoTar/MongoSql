@@ -46,12 +46,12 @@ nestedCondition
 	;
 
 conditionList
-    	: conjunction (OR conjunction {System.out.println("---OR---");})* -> ^(OR_COND conjunction+)
+    	: conjunction (OR conjunction )* -> ^(OR_COND conjunction+)
     	;
 
 
 conjunction
-	: condition (AND condition {System.out.println("---AND---");})* -> ^(AND_COND condition+)
+	: condition (AND condition)* -> ^(AND_COND condition+)
 	;
 
 condition
@@ -60,7 +60,7 @@ condition
 	;
 
 comparison
-	: ID OPERATOR expr  { System.out.println("(" + $ID.text + " " + $OPERATOR.text + " " + $expr.value + ")"); }  -> ^(RELOP OPERATOR ID expr)
+	: ID OPERATOR expr   -> ^(RELOP OPERATOR ID expr)
 	;
 
 
