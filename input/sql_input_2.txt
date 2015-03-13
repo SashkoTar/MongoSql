@@ -1,1 +1,1 @@
-select name, age from user where name='kolya' and age = 45 or name='igor' and (age=35 or age=15)
+select * from user where name='kolya' and age = 45 or name='igor' and (age=35 or age=15)

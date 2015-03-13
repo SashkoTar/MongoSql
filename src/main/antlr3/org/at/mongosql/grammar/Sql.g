@@ -36,7 +36,7 @@ select_query
     	;
 
 columnList
-	: columns+='*'
+	: columns+='*'   -> ^(COLUMNS '*')
 	| columns+=ID (',' columns+=ID)*  -> ^(COLUMNS ID+)
 	;
 

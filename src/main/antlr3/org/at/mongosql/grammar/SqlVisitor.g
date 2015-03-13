@@ -8,10 +8,12 @@ options {
    package org.at.mongosql.grammar;
       import org.at.mongosql.*;
       import com.mongodb.BasicDBObject;
+      import com.mongodb.DBCursor;
 }
 @members {
   AstInterpreter interp;
    void print(String s) { System.out.print(s); }
+   public DBCursor cursor;
 }
 // END: header
 
@@ -20,19 +22,16 @@ program
 @init {
 	interp = new AstInterpreter();
 }
-    :   stat+
-    ;
-
-stat:
-        select_query
+    :   select_query
     ;
 
 select_query
-    	:    ^(SELECT ^(FROM ID) columns=columnList ^(WHERE conditionList))  {interp.select($ID.text, $columns.value, $conditionList.value);}
+    	:    ^(SELECT ^(FROM ID) columnList ^(WHERE conditionList))  {cursor=interp.select($ID.text, $conditionList.value);}
     	;
 
-columnList returns [List value]
-	: ^(COLUMNS (columnNames+=ID)+) {$value = $columnNames;}
+columnList
+	: ^(COLUMNS (columnNames+=ID)+) {interp.setColumnsForProjection($columnNames); }
+	| ^(COLUMNS '*') {interp.setAllColumnsForProjection();}
 	;
 
 nestedCondition returns [BasicDBObject value]

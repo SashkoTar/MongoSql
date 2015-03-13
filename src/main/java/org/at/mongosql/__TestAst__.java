@@ -17,15 +17,9 @@ public class __TestAst__ {
     public static void main(String args[]) throws Exception {
         SqlLexer lex = new SqlLexer(new ANTLRFileStream("C:\\Projects\\NonJob\\Grammar\\MongoSql\\input\\sql_input_2.txt", "UTF8"));
         CommonTokenStream tokens = new CommonTokenStream(lex);
-
-        //     SqlParser g = new SqlParser(tokens, 49100, null);
-        //    g.initInterpreter(new SqlInterpreter());
-   SqlParser g = new SqlParser(tokens);
+        SqlParser g = new SqlParser(tokens);
         try {
-           // g.program().getTree();
-        //    System.out.println("tree=" + ((Tree)g.program().getTree()).toStringTree());
-                    //+g.program().getTree().toStringTree());
-            CommonTree tree = (CommonTree)g.program().getTree();
+            CommonTree tree = (CommonTree) g.program().getTree();
             CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
             SqlVisitor tp = new SqlVisitor(nodes); // create tree walker
             tp.program();

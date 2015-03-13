@@ -3,6 +3,7 @@ package org.at.mongosql;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.CommonTree;
 import org.at.mongosql.adaptor.DataSourceAdaptor;
 import org.at.mongosql.adaptor.MongoAdaptor;
 
@@ -16,6 +17,7 @@ public class AstInterpreter {
 
     DataSourceAdaptor adaptor;
 
+    private BasicDBObject columnsForProjection;
 
     public AstInterpreter() {
         try{
@@ -25,20 +27,40 @@ public class AstInterpreter {
         }
     }
 
-    private void log(String info) {
+    private void log(Object info) {
         System.out.println(info);
     }
 
     private void printResult(DBCursor cursor) {
         while(cursor.hasNext()) {
-            System.out.println(cursor.next());
+            log(cursor.next());
         }
     }
 
-    public void select(String collectionName, List columnNames, BasicDBObject criteria) {
-        DBCursor cursor = adaptor.find(collectionName, criteria);
-        printResult(cursor);
+    public DBCursor select(String collectionName, BasicDBObject criteria) {
+        DBCursor cursor = adaptor.find(collectionName, criteria, columnsForProjection);
+       // printResult(cursor);
+        return cursor;
     }
+
+
+    public void setColumnsForProjection(List<CommonTree> columns) {
+        BasicDBObject fields = new BasicDBObject();
+        if(columns.size() == 0) {
+            throw new IllegalArgumentException("Column List Can't Be Empty");
+        }
+        for(CommonTree field : columns) {
+            fields.append(field.getText(), 1);
+        }
+        //fields.append("_id", 0);
+        this.columnsForProjection = fields;
+    }
+
+
+    public void setAllColumnsForProjection() {
+        this.columnsForProjection = new BasicDBObject();
+    }
+
 
     public BasicDBObject handleAndCondition(List<BasicDBObject> criterias) {
         CriteriaBuilder builderOr = new CriteriaBuilder();
@@ -56,7 +78,7 @@ public class AstInterpreter {
             return builderOr.build("$or");
     }
 
-
+    //TODO  Refactor to use Enum
     public BasicDBObject handleBasicCriteria(String id, String operator, Object value) {
         if(operator.equals(">")) {
             return new BasicDBObject(id, new BasicDBObject("$gt", value));
@@ -76,14 +98,4 @@ public class AstInterpreter {
         return new BasicDBObject(id, value);
     }
 
-    private BasicDBObject handleColumns(List<Token> columns) {
-        BasicDBObject fields = new BasicDBObject();
-        if(columns.size() == 1 && columns.get(0).getText().equals("*")) {
-            return fields;
-        }
-        for(Token field : columns) {
-            fields.append(field.getText(), 1);
-        }
-        return fields;
-    }
 }
