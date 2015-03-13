@@ -27,7 +27,7 @@ public class MongoAdaptorTest {
     @Before
     public void initDbCollection() throws UnknownHostException {
         adapter = new MongoAdaptor();
-        MongoClient mongo = new MongoClient( "localhost" , 27017);
+        MongoClient mongo = new MongoClient("localhost", 27017);
         db = mongo.getDB("sqlTest");
         putDataToCollection("alex", 35);
         putDataToCollection("roma", 45);
@@ -38,7 +38,7 @@ public class MongoAdaptorTest {
     }
 
     @After
-    public  void dropDbCollection() {
+    public void dropDbCollection() {
         DBCollection table = db.getCollection("user");
         table.drop();
     }

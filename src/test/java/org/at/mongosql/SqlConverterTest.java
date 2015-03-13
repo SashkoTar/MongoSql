@@ -23,11 +23,6 @@ public class SqlConverterTest {
         converter = new SqlConverter();
     }
 
-
-
-
-
-
     @Test
     public void shouldConvertTwoCriterias() {
         List<BasicCriteria> criteriaList = new ArrayList<BasicCriteria>();
@@ -38,7 +33,6 @@ public class SqlConverterTest {
         BasicDBObject dbObject = converter.handle(searchList);
         assertTrue(dbObject.containsField("$and"));
         assertTrue(dbObject.size() == 1);
-
     }
 
     @Test

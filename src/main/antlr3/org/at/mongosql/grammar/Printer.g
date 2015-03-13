@@ -28,7 +28,7 @@ stat:
     ;
 
 select_query
-    	:    ^(SELECT ^(FROM ID) columns=columnList ^(WHERE conditionList))  {interp.select($ID.text, $columns.value);}
+    	:    ^(SELECT ^(FROM ID) columns=columnList ^(WHERE conditionList))  {interp.select($ID.text, $columns.value, $conditionList.value);}
     	;
 
 columnList returns [List value]
@@ -69,12 +69,3 @@ comparison returns [BasicDBObject value]
 	: ^(RELOP OPERATOR ID INT) { $value = interp.handleBasicCriteria($ID.text, $OPERATOR.text, $INT.int);}
 	| ^(RELOP OPERATOR ID STRING){ $value = interp.handleBasicCriteria($ID.text, $OPERATOR.text, $STRING.text);}
 	;
-
-
-// START: expr
-// Match a simple value or do a query
-//expr
-//    :   ^(INT)
-//    |   ^(STRING)
-//    ;
-// END: expr
