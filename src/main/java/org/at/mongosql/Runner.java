@@ -14,9 +14,9 @@ public class Runner {
     public static void main(String[] args) throws Exception {
         InputStream input = null;
 /*        if ( args.length>0 ) input = new FileInputStream(args[0]);
-        else input = System.in;*/
+        else input = System.in;
         input = new FileInputStream("C:\\Projects\\NonJob\\Grammar\\MongoSql\\input\\sql_input_no_criteria.txt");
         SqlInterpreter interp = new SqlInterpreter();
-        interp.interp(input);
+        interp.interp(input); */
     }
 }

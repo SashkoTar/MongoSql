@@ -1,7 +1,7 @@
 // START: header
-tree grammar Printer;                   // this grammar is a tree grammar called Printer
+tree grammar SqlVisitor;                   // this grammar is a tree grammar called Printer
 options {
-    tokenVocab=GenericSqlASTWhere;      // use token vocabulary from VecMath.g
+    tokenVocab=Sql;      // use token vocabulary from VecMath.g
     ASTLabelType=CommonTree;             // use homogeneous CommonTree for $ID, etc.
 }
 @header {
