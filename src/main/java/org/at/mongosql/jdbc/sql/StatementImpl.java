@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.sql.ResultSet;
 
 /**
  * Created by otarasenko on 3/13/15.
@@ -48,13 +49,12 @@ public class StatementImpl implements Statement {
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         try {
-            translateRequest(sql);
+            return new ResultSetMongoDBImpl(translateRequest(sql));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (RecognitionException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
