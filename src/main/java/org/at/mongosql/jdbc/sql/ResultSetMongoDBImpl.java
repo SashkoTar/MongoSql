@@ -1,7 +1,9 @@
 package org.at.mongosql.jdbc.sql;
 
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -17,16 +19,23 @@ import java.util.Map;
 public class ResultSetMongoDBImpl implements ResultSet {
 
     private DBCursor rowData;
+    private BasicDBObject currentRow;
+    private Object [] currentRowKeys;
 
     public ResultSetMongoDBImpl(DBCursor cursor) {
         this.rowData = cursor;
     }
 
 
-
     @Override
     public boolean next() throws SQLException {
-        return this.rowData.hasNext();
+        if (this.rowData.hasNext()) {
+            this.currentRow = (BasicDBObject)this.rowData.next();
+            this.currentRowKeys = this.currentRow.keySet().toArray();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -41,7 +50,13 @@ public class ResultSetMongoDBImpl implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        return null;
+        String key = (String)this.currentRowKeys[columnIndex - 1];
+        return getString(key);
+    }
+
+    @Override
+    public String getString(String columnLabel) throws SQLException {
+        return currentRow.getString(columnLabel);
     }
 
     @Override
@@ -119,10 +134,7 @@ public class ResultSetMongoDBImpl implements ResultSet {
         return null;
     }
 
-    @Override
-    public String getString(String columnLabel) throws SQLException {
-        return null;
-    }
+
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
