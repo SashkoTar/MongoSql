@@ -76,12 +76,31 @@ public class ResultSetMongoDBImpl implements ResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return 0;
+        String key = getColumnNameByIndex(columnIndex);
+        return currentRow.getInt(key);
+    }
+
+    @Override
+    public int getInt(String columnLabel) throws SQLException {
+        return currentRow.getInt(columnLabel);
+    }
+
+    @Override
+    public Date getDate(String columnLabel) throws SQLException {
+        long time = currentRow.getDate(columnLabel).getTime();
+        return new Date(time);
+    }
+
+    @Override
+    public Date getDate(int columnIndex) throws SQLException {
+        String key = getColumnNameByIndex(columnIndex);
+        return getDate(key);
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        return 0;
+        String key = getColumnNameByIndex(columnIndex);
+        return currentRow.getInt(key);
     }
 
     @Override
@@ -104,10 +123,7 @@ public class ResultSetMongoDBImpl implements ResultSet {
         return new byte[0];
     }
 
-    @Override
-    public Date getDate(int columnIndex) throws SQLException {
-        return null;
-    }
+
 
     @Override
     public Time getTime(int columnIndex) throws SQLException {
@@ -151,10 +167,7 @@ public class ResultSetMongoDBImpl implements ResultSet {
         return 0;
     }
 
-    @Override
-    public int getInt(String columnLabel) throws SQLException {
-        return 0;
-    }
+
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
@@ -181,10 +194,7 @@ public class ResultSetMongoDBImpl implements ResultSet {
         return new byte[0];
     }
 
-    @Override
-    public Date getDate(String columnLabel) throws SQLException {
-        return null;
-    }
+
 
     @Override
     public Time getTime(String columnLabel) throws SQLException {
@@ -989,5 +999,10 @@ public class ResultSetMongoDBImpl implements ResultSet {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
+    }
+
+
+    private String getColumnNameByIndex(int columnIndex) {
+        return (String)this.currentRowKeys[columnIndex - 1];
     }
 }

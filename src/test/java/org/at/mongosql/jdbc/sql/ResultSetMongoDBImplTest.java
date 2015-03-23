@@ -1,47 +1,74 @@
 package org.at.mongosql.jdbc.sql;
 
 import com.mongodb.DBCursor;
-import org.at.mongosql.adaptor.MongoAdaptor;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by otarasenko on 3/19/15.
  */
 public class ResultSetMongoDBImplTest {
 
-    private DBCursor retrieveCursor() throws UnknownHostException {
-        MongoAdaptor adapter = new MongoAdaptor();
-        Map<String, Object> conditions = new HashMap<String, Object>();
-        conditions.put("name", "alex");
-        return adapter.find("user", conditions);
+    private DBCursor mockCursor() {
+        DBObject object1 = (DBObject) JSON
+                .parse("{'_id' : { '$oid' : '5257df5a24acaf6fdffb9163'} , 'name':'alex', 'age':30, 'createdDate' : { '$date' : '2015-03-22T18:58:01.835Z'}}");
+        DBObject object2 = (DBObject) JSON
+                .parse("{'_id' : { '$oid' : '5257df5a24acaf6fdffb9163'} , 'name':'igor', 'age':22}");
+        DBCursor myMockCursor = mock(DBCursor.class);
+        Mockito.when(myMockCursor.next()).thenReturn(object1).thenReturn(object2).thenReturn(null);
+        Mockito.when(myMockCursor.hasNext()).thenReturn(true).thenReturn(false);
+        return myMockCursor;
+    }
+
+    private ResultSet getFilledResultSet() throws SQLException {
+        ResultSet rs = new ResultSetMongoDBImpl(mockCursor());
+        rs.next();
+        return rs;
     }
 
     @Test
     public void shouldReturnTrueOnNext() throws SQLException, UnknownHostException {
-        ResultSet rs = new ResultSetMongoDBImpl(retrieveCursor());
+        ResultSet rs = new ResultSetMongoDBImpl(mockCursor());
         assertTrue(rs.next());
     }
 
     @Test
     public void shouldGetStringByName() throws SQLException, UnknownHostException {
-        ResultSet rs = new ResultSetMongoDBImpl(retrieveCursor());
-        rs.next();
-        assertEquals("alex", rs.getString("name"));
+        assertEquals("alex", getFilledResultSet().getString("name"));
     }
 
     @Test
     public void shouldGetStringByIndex() throws SQLException, UnknownHostException {
-        ResultSet rs = new ResultSetMongoDBImpl(retrieveCursor());
-        rs.next();
-        assertEquals("alex", rs.getString(2));
+        assertEquals("alex", getFilledResultSet().getString(2));
+    }
+
+    @Test
+    public void shouldGetIntByName() throws SQLException, UnknownHostException {
+        assertEquals(30, getFilledResultSet().getInt("age"));
+    }
+
+    @Test
+    public void shouldGetIntByIndex() throws SQLException, UnknownHostException {
+        assertEquals(30, getFilledResultSet().getInt(3));
+    }
+
+    @Test
+    public void shouldGetDateByName() throws SQLException, UnknownHostException {
+        assertEquals(22, getFilledResultSet().getDate("createdDate").getDate());
+    }
+
+    @Test
+    public void shouldGetDateByIndex() throws SQLException, UnknownHostException {
+        assertEquals(22, getFilledResultSet().getDate(4).getDate());
     }
 }
