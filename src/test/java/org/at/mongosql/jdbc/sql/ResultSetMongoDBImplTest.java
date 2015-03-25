@@ -21,7 +21,7 @@ public class ResultSetMongoDBImplTest {
 
     private DBCursor mockCursor() {
         DBObject object1 = (DBObject) JSON
-                .parse("{'_id' : { '$oid' : '5257df5a24acaf6fdffb9163'} , 'name':'alex', 'age':30, 'createdDate' : { '$date' : '2015-03-22T18:58:01.835Z'}}");
+                .parse("{ '_id' : { '$oid' : '5512c613319144c5159af5f6'} , 'name' : 'alex' , 'age' : 30 , 'createdDate' : { '$date' : 1427293715017} , 'active' : true, 'weight' : 34.55}");
         DBObject object2 = (DBObject) JSON
                 .parse("{'_id' : { '$oid' : '5257df5a24acaf6fdffb9163'} , 'name':'igor', 'age':22}");
         DBCursor myMockCursor = mock(DBCursor.class);
@@ -64,11 +64,31 @@ public class ResultSetMongoDBImplTest {
 
     @Test
     public void shouldGetDateByName() throws SQLException, UnknownHostException {
-        assertEquals(22, getFilledResultSet().getDate("createdDate").getDate());
+        assertEquals(25, getFilledResultSet().getDate("createdDate").getDate());
     }
 
     @Test
     public void shouldGetDateByIndex() throws SQLException, UnknownHostException {
-        assertEquals(22, getFilledResultSet().getDate(4).getDate());
+        assertEquals(25, getFilledResultSet().getDate(4).getDate());
+    }
+
+    @Test
+    public void shouldGetBooleanByName() throws SQLException, UnknownHostException {
+        assertTrue(getFilledResultSet().getBoolean("active"));
+    }
+
+    @Test
+    public void shouldGetBooleanByIndex() throws SQLException, UnknownHostException {
+        assertTrue(getFilledResultSet().getBoolean(5));
+    }
+
+    @Test
+    public void shouldGetDoubleByName() throws SQLException, UnknownHostException {
+        assertEquals(34.55, getFilledResultSet().getDouble("weight"), 0.0001);
+    }
+
+    @Test
+    public void shouldGetDoubleByIndex() throws SQLException, UnknownHostException {
+        assertEquals(34.55, getFilledResultSet().getDouble(6), 0.0001);
     }
 }

@@ -4,6 +4,7 @@ package org.at.mongosql.jdbc.sql;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import org.at.mongosql.grammar.SqlParser;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -60,18 +61,35 @@ public class ResultSetMongoDBImpl implements ResultSet {
     }
 
     @Override
+    public boolean getBoolean(String columnLabel) throws SQLException {
+        return currentRow.getBoolean(columnLabel);
+    }
+
+    @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return false;
+        String key = (String)this.currentRowKeys[columnIndex - 1];
+        return getBoolean(key);
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        return 0;
+        return (byte)getInt(columnIndex);
+    }
+
+    @Override
+    public byte getByte(String columnLabel) throws SQLException {
+        return (byte)getInt(columnLabel);
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        return 0;
+        return (short)getInt(columnIndex);
+    }
+
+    @Override
+    public short getShort(String columnLabel) throws SQLException {
+        return (short)getInt(columnLabel);
+
     }
 
     @Override
@@ -104,14 +122,25 @@ public class ResultSetMongoDBImpl implements ResultSet {
     }
 
     @Override
-    public float getFloat(int columnIndex) throws SQLException {
-        return 0;
+    public double getDouble(String columnLabel) throws SQLException {
+        return currentRow.getDouble(columnLabel);
+    }
+    @Override
+    public double getDouble(int columnIndex) throws SQLException {
+        String key = getColumnNameByIndex(columnIndex);
+        return currentRow.getDouble(key);
     }
 
     @Override
-    public double getDouble(int columnIndex) throws SQLException {
-        return 0;
+    public float getFloat(String columnLabel) throws SQLException {
+        return (float) getDouble(columnLabel);
     }
+
+    @Override
+    public float getFloat(int columnIndex) throws SQLException {
+        return (float) getDouble(columnIndex);
+    }
+
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
@@ -122,7 +151,6 @@ public class ResultSetMongoDBImpl implements ResultSet {
     public byte[] getBytes(int columnIndex) throws SQLException {
         return new byte[0];
     }
-
 
 
     @Override
@@ -151,36 +179,8 @@ public class ResultSetMongoDBImpl implements ResultSet {
     }
 
 
-
-    @Override
-    public boolean getBoolean(String columnLabel) throws SQLException {
-        return false;
-    }
-
-    @Override
-    public byte getByte(String columnLabel) throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public short getShort(String columnLabel) throws SQLException {
-        return 0;
-    }
-
-
-
     @Override
     public long getLong(String columnLabel) throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public float getFloat(String columnLabel) throws SQLException {
-        return 0;
-    }
-
-    @Override
-    public double getDouble(String columnLabel) throws SQLException {
         return 0;
     }
 
