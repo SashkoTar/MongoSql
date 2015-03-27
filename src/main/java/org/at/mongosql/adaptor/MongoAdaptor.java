@@ -16,13 +16,17 @@ public class MongoAdaptor implements DataSourceAdaptor {
         this("localhost", 27017, "sqlTest");
     }
 
+    //TODO Improve Connection Checking
     public MongoAdaptor(String host, int port, String database) {
-       try {
-           MongoClient mongo = new MongoClient(host, port);
-           db = mongo.getDB(database);
-       } catch (UnknownHostException ex) {
-           throw new RuntimeException("Database Not Found", ex);
-       }
+        try {
+            MongoClient mongo = new MongoClient(host, port);
+            db = mongo.getDB(database);
+            db.getCollectionNames();
+        } catch (UnknownHostException ex) {
+            throw new RuntimeException("Database Not Found", ex);
+        } catch (MongoException ex) {
+            throw new RuntimeException("Database Is Not Run", ex);
+        }
     }
 
     public DBCursor find(String collection) {
