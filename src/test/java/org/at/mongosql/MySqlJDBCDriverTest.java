@@ -14,7 +14,7 @@ public class MySqlJDBCDriverTest {
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
 
-    @Test
+    //@Test
     public void shouldReadData() throws Exception {
         readDataBase();
     }

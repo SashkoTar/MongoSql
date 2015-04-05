@@ -21,7 +21,7 @@ public class MongoSqlConnection implements Connection {
 
     @Override
     public Statement createStatement() throws SQLException {
-        return null;
+       return new StatementImpl(adaptor);
     }
 
     @Override

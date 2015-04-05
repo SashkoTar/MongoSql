@@ -1,11 +1,16 @@
 package org.at.mongosql.jdbc.sql;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
+import com.mongodb.util.Hash;
 import org.antlr.runtime.ANTLRInputStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.at.mongosql.AstInterpreter;
+import org.at.mongosql.adaptor.DataSourceAdaptor;
+import org.at.mongosql.adaptor.MongoAdaptor;
 import org.at.mongosql.grammar.SqlLexer;
 import org.at.mongosql.grammar.SqlParser;
 import org.at.mongosql.grammar.SqlVisitor;
@@ -15,11 +20,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
 import java.sql.ResultSet;
+import java.util.Map;
 
 /**
  * Created by otarasenko on 3/13/15.
  */
 public class StatementImpl implements Statement {
+
+    DataSourceAdaptor adaptor;
+
+    public StatementImpl(DataSourceAdaptor adaptor) {
+        this.adaptor = adaptor;
+    }
 
     private void printResult(DBCursor cursor) {
         while (cursor.hasNext()) {
@@ -31,25 +43,28 @@ public class StatementImpl implements Statement {
         return new ByteArrayInputStream(sqlStatement.getBytes());
     }
 
-    private DBCursor translateRequest(String sqlRequest) throws IOException, RecognitionException {
+    private Map<String, Object > translateRequest(String sqlRequest) throws IOException, RecognitionException {
         SqlLexer lex = new SqlLexer(new ANTLRInputStream(convertToInputStream(sqlRequest)));
         CommonTokenStream tokens = new CommonTokenStream(lex);
         SqlParser g = new SqlParser(tokens);
 
         CommonTree tree = (CommonTree) g.program().getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
-        SqlVisitor tp = new SqlVisitor(nodes); // create tree walker
+        AstInterpreter interpreter = new AstInterpreter();
+        SqlVisitor tp = new SqlVisitor(nodes, interpreter); // create tree walker
         tp.program();
         // printResult(tp.cursor);
 
-        return tp.cursor;
+        return interpreter.getQueryInfo();
     }
 
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         try {
-            return new ResultSetMongoDBImpl(translateRequest(sql));
+            Map<String, Object> queryInfo = translateRequest(sql);
+            DBCursor cursor = adaptor.find((String)queryInfo.get("collectionName"), (BasicDBObject)queryInfo.get("criteria"), (BasicDBObject)queryInfo.get("columnsForProjection"));
+            return new ResultSetMongoDBImpl(cursor);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (RecognitionException e) {
