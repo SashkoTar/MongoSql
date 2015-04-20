@@ -78,24 +78,9 @@ public class AstInterpreter {
         return builderOr.build("$or");
     }
 
-    //TODO  Refactor to use Enum
+
     public BasicDBObject handleBasicCriteria(String id, String operator, Object value) {
-        if (operator.equals(">")) {
-            return new BasicDBObject(id, new BasicDBObject("$gt", value));
-        }
-        if (operator.equals(">=")) {
-            return new BasicDBObject(id, new BasicDBObject("$gte", value));
-        }
-        if (operator.equals("<")) {
-            return new BasicDBObject(id, new BasicDBObject("$lt", value));
-        }
-        if (operator.equals("<=")) {
-            return new BasicDBObject(id, new BasicDBObject("$lte", value));
-        }
-        if (operator.equals("<>")) {
-            return new BasicDBObject(id, new BasicDBObject("$ne", value));
-        }
-        return new BasicDBObject(id, value);
+        return RelOp.getByToken(operator).build(id, value);
     }
 
 }

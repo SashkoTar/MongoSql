@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -56,6 +57,17 @@ public class StatementImplTest {
         assertTrue(rs.next());
     }
 
+    @Test
+    public void shouldInsertRow() throws SQLException, UnknownHostException {
+        Statement statement = new StatementImpl(new MongoAdaptor());
+        ResultSet rs = statement.executeQuery("select * from user where  age = 45 and name = 'armani'");
+        assertFalse(rs.next());
+
+        statement.executeUpdate("insert into user (name, age) values ('armani', 45");
+
+        rs = statement.executeQuery("select * from user where  age = 45 and name = 'armani'");
+        assertTrue(rs.next());
+    }
 
 
 }
